@@ -12,19 +12,19 @@ import (
 // The paytable defines symbol payouts and count ranges for winning combinations.
 //
 // Parameters:
-//   - reader: CSV file adapter for reading configuration files
+//   - csvReader: CSV file adapter for reading configuration files
 //   - generalPath: path builder pointing to the general configuration directory
 //
 // Returns:
 //   - pointer to PayTable containing symbol payouts and ranges
 //   - error if reading or parsing fails
 func ReadPaytable(
-	reader *reader.Adapter,
+	csvReader *reader.Adapter,
 	generalPath *tools.PathBuilder,
 ) (*paytable.PayTable, error) {
 	const fileName = "paytable"
 
-	data, err := reader.ReadCSV(generalPath.File(fileName))
+	data, err := csvReader.ReadCSV(generalPath.File(fileName))
 	if err != nil {
 		return nil, fmt.Errorf("read paytable: %w", err)
 	}

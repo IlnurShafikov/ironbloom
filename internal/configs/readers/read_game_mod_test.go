@@ -4,11 +4,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/IlnurShafikov/ironbloom/internal/configs/readers"
-	"github.com/IlnurShafikov/ironbloom/internal/tools/rngtest"
-
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/IlnurShafikov/ironbloom/internal/configs/readers"
+	"github.com/IlnurShafikov/ironbloom/internal/tools/rngtest"
 )
 
 func TestReadGameMods(t *testing.T) {

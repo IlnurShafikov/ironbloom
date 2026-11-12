@@ -21,7 +21,7 @@ type BetResult struct {
 }
 
 type LoadGameResult struct {
-	GameRules      json.RawMessage `json:"rules"`
 	Step           *Step           `json:"step"`
+	GameRules      json.RawMessage `json:"rules"`
 	CostMultiplier uint64          `json:"costMultiplier"`
 }

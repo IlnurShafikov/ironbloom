@@ -32,6 +32,8 @@ func transformSingleEvent(curEvent events.Event, betValue uint64) error {
 	switch curEvent.EventType() {
 	case events.WinsType:
 		return transformWinEvent(curEvent, betValue)
+	case events.WinType, events.JpTransformType, events.DoubleWins:
+		return ErrInvalidEventType
 	default:
 		return ErrInvalidEventType
 	}

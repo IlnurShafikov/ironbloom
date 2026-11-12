@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+  workflow_dispatch:
+
+# Cancel outdated runs for the same branch when new commits are pushed.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  # slot-engine lives in a private repository.
+  GOPRIVATE: github.com/IlnurShafikov/*
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Allow access to private modules
+        run: git config --global url."https://x-access-token:${{ secrets.PRIVATE_MODULES_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v8
+        with:
+          version: v2.14.0
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Allow access to private modules
+        run: git config --global url."https://x-access-token:${{ secrets.PRIVATE_MODULES_TOKEN }}@github.com/".insteadOf "https://github.com/"
+
+      - name: Verify dependencies
+        run: |
+          go mod download
+          go mod verify
+
+      - name: Build
+        run: go build ./...
+
+      - name: Vet
+        run: go vet ./...
+
+      - name: Test
+        run: go test -race -count=1 ./...

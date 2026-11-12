@@ -1,4 +1,3 @@
-//nolint:all // it's ok for cast package
 package cast
 
 import (
@@ -10,8 +9,8 @@ import (
 // predeclared types and types with the same underlying type.
 type Number interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64 |
-	~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 |
-	~float32 | ~float64
+		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 |
+		~float32 | ~float64
 }
 
 // getMinMax returns the minimum and maximum representable values for a numeric type.

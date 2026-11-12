@@ -4,13 +4,14 @@ package datatransfer
 import (
 	"fmt"
 
+	jsoniter "github.com/json-iterator/go"
+
 	"github.com/IlnurShafikov/ironbloom/internal/entities/rules"
 	"github.com/IlnurShafikov/ironbloom/internal/game"
 	"github.com/IlnurShafikov/ironbloom/pkg/datatransfer/dto/base"
 	"github.com/IlnurShafikov/ironbloom/pkg/datatransfer/dto/common"
 	"github.com/IlnurShafikov/ironbloom/pkg/datatransfer/dto/step"
 	"github.com/IlnurShafikov/slot-engine/pkg/model"
-	jsoniter "github.com/json-iterator/go"
 )
 
 // GetEnterResult creates the initial game load result sent to the client.

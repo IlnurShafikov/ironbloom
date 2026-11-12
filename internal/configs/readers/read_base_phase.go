@@ -17,7 +17,7 @@ import (
 // It loads symbol distributions and weight groups from CSV files.
 //
 // Parameters:
-//   - reader: CSV file adapter for reading configuration files
+//   - csvReader: CSV file adapter for reading configuration files
 //   - modPath: path builder pointing to the game mode directory
 //   - general: general configuration shared across all phases
 //
@@ -25,7 +25,7 @@ import (
 //   - pointer to SpinPhase containing base game configuration
 //   - error if reading or parsing fails
 func readBasePhase(
-	reader *reader.Adapter, modPath *tools.PathBuilder, general *configs.GeneralConfig,
+	csvReader *reader.Adapter, modPath *tools.PathBuilder, general *configs.GeneralConfig,
 ) (*base.SpinPhase, error) {
 	const (
 		basePrefix = "base"
@@ -34,12 +34,12 @@ func readBasePhase(
 	// PathBuilder for creating paths to files
 	phasePath := modPath.Phase(basePrefix)
 
-	dist, err := common.ReadDistributions(reader, phasePath)
+	dist, err := common.ReadDistributions(csvReader, phasePath)
 	if err != nil {
 		return nil, fmt.Errorf("read distributions: %w", err)
 	}
 
-	gen, err := readBaseReelsGenerator(reader, phasePath, general, dist.CopyValues())
+	gen, err := readBaseReelsGenerator(csvReader, phasePath, general, dist.CopyValues())
 	if err != nil {
 		return nil, fmt.Errorf("read base reel generator: %w", err)
 	}
@@ -79,7 +79,7 @@ func readLineCalculator(
 // builds the standard board generator used for base-game spins.
 //
 // Parameters:
-//   - reader: CSV file adapter backed by the embedded config FS
+//   - csvReader: CSV file adapter backed by the embedded config FS
 //   - phasePath: path builder pointing to the base-game phase directory
 //   - general: shared game configuration supplying the per-reel symbol counts
 //   - groupIDs: trigger group IDs for which reel files must be loaded
@@ -88,12 +88,12 @@ func readLineCalculator(
 //   - pointer to Generator with all group reel strips loaded
 //   - error if any reel file cannot be read or the generator cannot be initialised
 func readBaseReelsGenerator(
-	reader *reader.Adapter,
+	csvReader *reader.Adapter,
 	phasePath *tools.PathBuilder,
 	general *configs.GeneralConfig,
 	groupIDs []model.GroupID,
 ) (*generator.Generator, error) {
-	reels, err := common.ReadReels(reader, phasePath, groupIDs)
+	reels, err := common.ReadReels(csvReader, phasePath, groupIDs)
 	if err != nil {
 		return nil, fmt.Errorf("read reels: %w", err)
 	}

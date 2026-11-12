@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 )
 
 type Progress struct {
@@ -96,7 +96,7 @@ func (pb *Progress) Finish() {
 func getTerminalWidth() int {
 	const defaultWidth = 50
 
-	width, _, err := terminal.GetSize(int(os.Stdout.Fd())) //nolint:gosec // G115: safe
+	width, _, err := term.GetSize(int(os.Stdout.Fd()))
 	if err == nil {
 		return width
 	}

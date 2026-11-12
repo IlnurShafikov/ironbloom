@@ -3,7 +3,6 @@ run:
   tests: false # игнорировать все тестовые файлы
 output:
   formats:
-    # TODO: проверить этот формат в github ci
     tab:
       path: stdout
   sort-order:
@@ -88,7 +87,7 @@ linters:
     # проверяет, что ошибки именуются с префикса Err и у типа ошибки название начинается с Error
     - errname
     # проверяет, что при создании структуры у нее были явно заполнены все поля
-    - exhaustruct
+    - exhaustruct_v5
     # через регулярные выражения запрещает использование определенных функций или конструкций
     - forbidigo
     # запрещает преобразование типов без проверки на соответствие
@@ -590,7 +589,7 @@ linters:
     rules:
       - linters:
           - err113
-          - exhaustruct
+          - exhaustruct_v5
           - funlen
           - gocognit
           - govet
@@ -613,7 +612,7 @@ formatters:
         - dot # импорты которые начинаются с "."
         - default # все внешние зависимости go.mod зависимости
         - blank # разделяем пустой строкой
-        - prefix(github.com/releaseband/) # все остальные импорты которые начинаются с префикса
+        - prefix(github.com/IlnurShafikov/) # импорты проекта и собственных библиотек
   exclusions:
     generated: lax
     paths:
