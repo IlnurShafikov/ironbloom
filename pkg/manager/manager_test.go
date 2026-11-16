@@ -163,3 +163,31 @@ func seed() int64 {
 
 	return respSeed
 }
+
+// TestGameManager_GetRoundResult_Deterministic checks that the same seed
+// always produces the same sequence of steps for every RTP version.
+func TestGameManager_GetRoundResult_Deterministic(t *testing.T) {
+	gameManager, err := manager.NewGameManager()
+	require.NoError(t, err)
+
+	for _, rtp := range []int{90, 92, 94, 96} {
+		for gameSeed := int64(1); gameSeed <= 300; gameSeed++ {
+			first, err := gameManager.GetRoundResult(
+				context.Background(), rules.SimpleModID, rules.EmptyFeatureID, rtp, gameSeed, bet)
+			require.NoError(t, err)
+
+			second, err := gameManager.GetRoundResult(
+				context.Background(), rules.SimpleModID, rules.EmptyFeatureID, rtp, gameSeed, bet)
+			require.NoError(t, err)
+
+			require.Len(t, second.Steps, len(first.Steps), "rtp=%d seed=%d", rtp, gameSeed)
+
+			for i := range first.Steps {
+				require.Equal(t, first.Steps[i].StepWin, second.Steps[i].StepWin,
+					"rtp=%d seed=%d step=%d", rtp, gameSeed, i)
+				require.Equal(t, first.Steps[i].TotalWin, second.Steps[i].TotalWin,
+					"rtp=%d seed=%d step=%d", rtp, gameSeed, i)
+			}
+		}
+	}
+}
