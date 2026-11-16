@@ -178,14 +178,11 @@ func makeBaseClientStep(
 //
 // Returns:
 //   - TYPE_FREE_SPIN if free spins were triggered
-//   - TYPE_RE_SPIN if respins were triggered
 //   - TYPE_BASE_SPIN if neither feature was triggered (normal flow)
 func nextStepTypeFromBase(freeSpinsCount, reSpinCount uint32) int {
 	switch {
 	case freeSpinsCount > 0:
 		return rules.Step_TYPE_FREE_SPIN
-	case reSpinCount > 0:
-		return rules.Step_TYPE_RE_SPIN
 	default:
 		return rules.Step_TYPE_BASE_SPIN
 	}

@@ -27,9 +27,17 @@ func (rp *RoundParser) MergeResult(other *result.Result) {
 
 // Parse processes a complete round result and updates simulation statistics
 func (rp *RoundParser) Parse(roundResult *resp.Round) error {
+	var totalFreeWin uint64
+
 	totalBaseWin := rp.parseBasePhase(roundResult.BasePhase)
 
-	roundTotalWin := totalBaseWin
+	if len(roundResult.FreePhase) > 0 {
+		totalFreeWin = rp.parseFreePhase(roundResult.FreePhase)
+
+		rp.res.Base().AddFreeGameSteps(len(roundResult.FreePhase))
+	}
+
+	roundTotalWin := totalBaseWin + totalFreeWin
 
 	rp.updateRoundStatistics(roundTotalWin)
 
@@ -43,11 +51,42 @@ func (rp *RoundParser) parseBasePhase(baseResult *resp.Base) uint64 {
 	rp.res.Base().AddWins(baseTotalWin)
 	rp.res.BaseWinRanges.AddWinRange(baseTotalWin)
 
+	if baseTotalWin > 0 {
+		rp.res.BasePositiveBets().Add()
+	}
+
 	if baseResult.MaxWinReached() {
 		rp.res.AddMaxWinReached()
 	}
 
 	return baseTotalWin
+}
+
+// parseFreePhase processes all free spin results
+func (rp *RoundParser) parseFreePhase(freeSteps []*resp.Free) uint64 {
+	var totalFreeWin uint64
+
+	for _, freeStep := range freeSteps {
+		stepWin := rp.processSingleFreeStep(freeStep)
+		totalFreeWin += stepWin
+	}
+
+	rp.res.FreeWinRanges.AddWinRange(totalFreeWin)
+
+	return totalFreeWin
+}
+
+// processSingleFreeStep processes a single free spin step
+func (rp *RoundParser) processSingleFreeStep(freeResult *resp.Free) uint64 {
+	stepWin := freeResult.StepWin()
+
+	rp.res.Free().AddWins(stepWin)
+
+	if freeResult.MaxWinReached() {
+		rp.res.AddMaxWinReached()
+	}
+
+	return stepWin
 }
 
 // updateRoundStatistics updates overall round statistics

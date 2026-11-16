@@ -99,7 +99,7 @@ func (f *SpinPhase) spin(
 		return nil, fmt.Errorf("process line win: %w", err)
 	}
 
-	err = f.checkRetrigger(res)
+	err = f.checkRetrigger(res, winLimiter)
 	if err != nil {
 		return nil, fmt.Errorf("check retrigger: %w", err)
 	}
@@ -132,7 +132,11 @@ func (f *SpinPhase) processWin(
 	return stepWin, nil
 }
 
-func (f *SpinPhase) checkRetrigger(res *result.Free) error {
+func (f *SpinPhase) checkRetrigger(res *result.Free, winLimiter limiter.WinLimiter) error {
+	if winLimiter.MaxWinReached() {
+		return nil
+	}
+
 	scatterCount := res.Board.CalculateSymbol(rules.ScatterID)
 	fsCount := f.fSInitCounter.GetFsInitCount(scatterCount)
 

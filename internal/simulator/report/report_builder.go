@@ -108,6 +108,30 @@ func (rb *Builder) addSection() {
 	rb.builder.WriteString(SectionSeparator)
 }
 
+func (rb *Builder) tab(label, value string) {
+	rb.addTabLine(label + value)
+}
+
+func (rb *Builder) line(label, value string) {
+	rb.addLine(label + value)
+}
+
+func (rb *Builder) tabFloat(label string, value float64) {
+	rb.tab(label, simtools.Float64ToString(value))
+}
+
+func (rb *Builder) tabInt(label string, value int) {
+	rb.tab(label, simtools.IntToString(value))
+}
+
+func (rb *Builder) tabUint64(label string, value uint64) {
+	rb.tab(label, simtools.Uint64ToString(value))
+}
+
+func (rb *Builder) tabUint32(label string, value uint32) {
+	rb.tab(label, simtools.Uint32ToString(value))
+}
+
 // GetFormattedReport returns the accumulated report text as a string.
 func (rb *Builder) GetFormattedReport() string {
 	return rb.builder.String()
@@ -124,6 +148,7 @@ func (rb *Builder) WriteReport(res *result.Result, config Config) {
 	rb.writeReportHeader(config)
 	rb.writeTotalRTPSection(config, res)
 	rb.writeBaseGameSection(config, res.Base())
+	rb.writeFreeGameSection(config, res)
 	rb.writeVolatilitySection(res, config)
 	rb.writeMaxWinSection(res, config.RoundCost)
 	rb.writeHitRateSection(res, config.Spins)
@@ -145,8 +170,8 @@ func (rb *Builder) writeReportHeader(config Config) {
 func (rb *Builder) writeTotalRTPSection(config Config, res *result.Result) {
 	rb.addSection()
 
-	totalWins := res.Base().GetWins()
-	totalRTP := simtools.CalculateRTP(config.TotalBet, totalWins)
+	totalWins := res.Base().GetWins() + res.Free().GetWins()
+	totalRTP := safeRTP(config.TotalBet, totalWins)
 	rb.addLine(SectionTotalRTP + simtools.Float64ToString(totalRTP))
 }
 
@@ -154,10 +179,23 @@ func (rb *Builder) writeTotalRTPSection(config Config, res *result.Result) {
 func (rb *Builder) writeBaseGameSection(config Config, baseRes *result.BaseGame) {
 	rb.addSection()
 
-	baseRTP := simtools.CalculateRTP(config.TotalBet, baseRes.GetWins())
+	baseRTP := safeRTP(config.TotalBet, baseRes.GetWins())
 
 	rb.addLine(SectionBaseRTP + simtools.Float64ToString(baseRTP))
 	rb.addTabLine(LabelByWins + simtools.Float64ToString(baseRTP))
+}
+
+// writeFreeGameSection writes free spins section
+func (rb *Builder) writeFreeGameSection(config Config, res *result.Result) {
+	rb.addSection()
+
+	free := res.Free()
+
+	freeRTP := safeRTP(config.TotalBet, free.GetWins())
+
+	rb.line(SectionFreeRTP, simtools.Float64ToString(freeRTP))
+
+	rb.tabFloat(LabelByWins, freeRTP)
 }
 
 // writeVolatilitySection writes volatility section
@@ -165,7 +203,7 @@ func (rb *Builder) writeVolatilitySection(res *result.Result, config Config) {
 	rb.addSection()
 
 	totalWins := res.Base().GetWins()
-	totalRTP := simtools.CalculateRTP(config.TotalBet, totalWins)
+	totalRTP := safeRTP(config.TotalBet, totalWins)
 
 	sd := res.Xi().Sd(totalRTP, float64(config.Spins))
 	volatility := simtools.CalculateVolatility(sd)
@@ -201,6 +239,9 @@ func (rb *Builder) writeWinRangesSection(res *result.Result, repCfg Config) {
 	rb.addSection()
 	rb.writeWinRangeDetails(TitleBaseWinRanges, res.BaseWinRanges, repCfg.Spins, repCfg.TotalBet)
 	rb.addSection()
+	rb.writeWinRangeDetails(
+		TitleFreeWinRanges, res.FreeWinRanges, int(res.Base().FreeGameTriggered), repCfg.TotalBet,
+	)
 }
 
 func (rb *Builder) writeWinRangeDetails(
@@ -216,7 +257,7 @@ func (rb *Builder) writeWinRangeDetails(
 
 	for _, curRange := range allRanges {
 		currOnce := float64(1) / (float64(curRange.Count) / float64(stepsCount))
-		rangeRtp := simtools.CalculateRTP(totalBet, curRange.TotalSum)
+		rangeRtp := safeRTP(totalBet, curRange.TotalSum)
 
 		line := fmt.Sprintf("%-18s | %-13d | %-10.2f | %-8.4f |",
 			curRange.Range.Name, curRange.Count, currOnce, rangeRtp)
@@ -278,4 +319,12 @@ func (g *GeneralWriter) writeReport(report string) error {
 	}
 
 	return nil
+}
+
+func safeRTP(totalBet uint64, wins uint64) float64 {
+	if totalBet == 0 || wins == 0 {
+		return 0
+	}
+
+	return simtools.CalculateRTP(totalBet, wins)
 }
