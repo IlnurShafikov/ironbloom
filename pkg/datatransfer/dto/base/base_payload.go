@@ -16,9 +16,6 @@ type Payload struct {
 	// Symbols represent the initial symbol board before any transformations
 	Symbols []*common.Symbol `json:"symbols"`
 
-	// AfterSymbols represents the final symbol board after all transformations
-	AfterSymbols []*common.Symbol `json:"afterSymbols,omitempty"`
-
 	// NextStepType indicates what type of step comes next (base, free, etc.)
 	NextStepType int `json:"nextStepType"`
 }

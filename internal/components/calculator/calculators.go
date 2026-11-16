@@ -18,7 +18,7 @@ type Calculators interface {
 	CalculateWaysWithMultipliers(
 		board model.Board,
 		winLimiter limiter.WinLimiter,
-		wilds []*result.WildMultiplier,
+		wilds []result.WildMultiplier,
 	) (calculators.WaysWins, error)
 }
 
@@ -47,7 +47,7 @@ func (c *Calculator) CalculateWays(
 func (c *Calculator) CalculateWaysWithMultipliers(
 	board model.Board,
 	winLimiter limiter.WinLimiter,
-	wilds []*result.WildMultiplier,
+	wilds []result.WildMultiplier,
 ) (calculators.WaysWins, error) {
 	wins, err := c.ways.Calculate(
 		board,

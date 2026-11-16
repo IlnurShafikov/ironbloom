@@ -14,7 +14,7 @@ type WildsMultiplierGetter interface {
 	GenerateWildsMultiplier(
 		rng model.RNG,
 		board model.Board,
-	) ([]*result.WildMultiplier, error)
+	) ([]result.WildMultiplier, error)
 }
 
 var _ WildsMultiplierGetter = (*MultiplierGetter)(nil)
@@ -37,8 +37,8 @@ func NewMultiplierGetter(
 func (m *MultiplierGetter) GenerateWildsMultiplier(
 	rng model.RNG,
 	board model.Board,
-) ([]*result.WildMultiplier, error) {
-	var resp []*result.WildMultiplier
+) ([]result.WildMultiplier, error) {
+	var resp []result.WildMultiplier
 
 	for _, wildID := range m.wildIDs {
 		positions := board.SymbolPositions(wildID)

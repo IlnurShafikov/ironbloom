@@ -12,8 +12,8 @@ func NewWildMultiplier(
 	position model.Position,
 	multiplier uint64,
 	symbolID model.Symbol,
-) *WildMultiplier {
-	return &WildMultiplier{
+) WildMultiplier {
+	return WildMultiplier{
 		position:   position,
 		multiplier: multiplier,
 		symbolID:   symbolID,

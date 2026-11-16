@@ -37,10 +37,10 @@ func transformSingleEvent(curEvent events.Event, betValue uint64) error {
 	}
 }
 
-// transformWinEvent transforms a line wins event by multiplying payouts by bet value.
+// transformWinEvent transforms a ways wins event by multiplying payouts by bet value.
 //
 // Parameters:
-//   - curEvent: the event to transform (must be *events.LineWinsEvent)
+//   - curEvent: the event to transform (must be *events.WinsEvent)
 //   - betValue: the player's bet value
 //
 // Returns:

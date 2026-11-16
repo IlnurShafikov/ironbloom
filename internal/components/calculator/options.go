@@ -7,7 +7,7 @@ import (
 )
 
 func WithWaysWinMultiplier(
-	wilds []*result.WildMultiplier,
+	wilds []result.WildMultiplier,
 ) calculators.WaysStrategy {
 	if len(wilds) == 0 {
 		return withEmptyWaysMultiplier
@@ -17,7 +17,7 @@ func WithWaysWinMultiplier(
 }
 
 func withWaysWinMultiplier(
-	wilds []*result.WildMultiplier,
+	wilds []result.WildMultiplier,
 ) calculators.WaysStrategy {
 	return func(
 		win calculators.WaysWin,
@@ -97,7 +97,7 @@ func rightToLeftCounter(
 	return count
 }
 
-func countWildsOnReel(reelIndex int, wilds []*result.WildMultiplier) uint64 {
+func countWildsOnReel(reelIndex int, wilds []result.WildMultiplier) uint64 {
 	var count uint64
 
 	for _, wild := range wilds {

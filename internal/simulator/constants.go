@@ -29,5 +29,5 @@ const (
 
 	// DefaultWorkersCount is the number of parallel workers used in simulation.
 	// 1 means sequential (no parallelism).
-	DefaultWorkersCount = 1
+	DefaultWorkersCount = 4
 )

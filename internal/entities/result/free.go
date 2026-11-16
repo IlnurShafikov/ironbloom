@@ -11,7 +11,7 @@ type Free struct {
 	Board model.Board
 	// events accumulates all events that occurred during this free spin.
 	events      []events.Event
-	Multipliers []*WildMultiplier
+	Multipliers []WildMultiplier
 	// totalWin is the cumulative win amount up to and including this free spin.
 	totalWin uint64
 	// stepWin is the win amount for this specific free spin.
@@ -26,7 +26,7 @@ type Free struct {
 //
 // Returns:
 //   - pointer to a new Free instance with counters and flags initialized to zero/false
-func NewFree(board model.Board, multipliers []*WildMultiplier) *Free {
+func NewFree(board model.Board, multipliers []WildMultiplier) *Free {
 	return &Free{
 		Board:         board,
 		Multipliers:   multipliers,

@@ -16,13 +16,13 @@ func TestWithWaysWinMultiplier(t *testing.T) {
 
 	tests := []struct {
 		name       string
-		wilds      []*result.WildMultiplier
+		wilds      []result.WildMultiplier
 		win        calculators.WaysWin
 		wantPayout uint64
 	}{
 		{
 			name:  "without wilds",
-			wilds: []*result.WildMultiplier{},
+			wilds: []result.WildMultiplier{},
 			win: calculators.WaysWin{
 				Positions: model.Positions{
 					newPos(0, 0),
@@ -36,7 +36,7 @@ func TestWithWaysWinMultiplier(t *testing.T) {
 		},
 		{
 			name: "with wilds but not on winning reels",
-			wilds: []*result.WildMultiplier{
+			wilds: []result.WildMultiplier{
 				result.NewWildMultiplier(newPos(3, 0), 2, 0),
 			},
 			win: calculators.WaysWin{
@@ -52,7 +52,7 @@ func TestWithWaysWinMultiplier(t *testing.T) {
 		},
 		{
 			name: "with one wild on winning reel",
-			wilds: []*result.WildMultiplier{
+			wilds: []result.WildMultiplier{
 				result.NewWildMultiplier(
 					newPos(1, 0),
 					3, 0),
@@ -71,7 +71,7 @@ func TestWithWaysWinMultiplier(t *testing.T) {
 		},
 		{
 			name: "with 3 wilds",
-			wilds: []*result.WildMultiplier{
+			wilds: []result.WildMultiplier{
 				result.NewWildMultiplier(newPos(0, 0), 2, 0),
 				result.NewWildMultiplier(newPos(0, 1), 3, 0),
 				result.NewWildMultiplier(newPos(2, 0), 5, 0),
@@ -96,7 +96,7 @@ func TestWithWaysWinMultiplier(t *testing.T) {
 		},
 		{
 			name: "multiple wilds on different reels",
-			wilds: []*result.WildMultiplier{
+			wilds: []result.WildMultiplier{
 				result.NewWildMultiplier(newPos(0, 0), 2, 0),
 				result.NewWildMultiplier(newPos(2, 0), 4, 0), // ignoring this one
 			},
@@ -181,19 +181,19 @@ func TestCountWildsOnReel(t *testing.T) {
 	tests := []struct {
 		name      string
 		reel      int
-		wilds     []*result.WildMultiplier
+		wilds     []result.WildMultiplier
 		wantCount uint64
 	}{
 		{
 			name:      "no wilds",
 			reel:      0,
-			wilds:     []*result.WildMultiplier{},
+			wilds:     []result.WildMultiplier{},
 			wantCount: 0,
 		},
 		{
 			name: "wild with multiplier 1",
 			reel: 0,
-			wilds: []*result.WildMultiplier{
+			wilds: []result.WildMultiplier{
 				result.NewWildMultiplier(model.Position{ReelIndex: 0, RowIndex: 0}, 1, 0),
 			},
 			wantCount: 0, // multiplier - 1 = 0
@@ -201,7 +201,7 @@ func TestCountWildsOnReel(t *testing.T) {
 		{
 			name: "wild with multiplier 3",
 			reel: 0,
-			wilds: []*result.WildMultiplier{
+			wilds: []result.WildMultiplier{
 				result.NewWildMultiplier(model.Position{ReelIndex: 0, RowIndex: 0}, 3, 0),
 			},
 			wantCount: 2, // multiplier - 1 = 2
@@ -209,7 +209,7 @@ func TestCountWildsOnReel(t *testing.T) {
 		{
 			name: "multiple wilds on same reel",
 			reel: 1,
-			wilds: []*result.WildMultiplier{
+			wilds: []result.WildMultiplier{
 				result.NewWildMultiplier(model.Position{ReelIndex: 1, RowIndex: 0}, 2, 0),
 				result.NewWildMultiplier(model.Position{ReelIndex: 1, RowIndex: 1}, 4, 0),
 			},
@@ -218,7 +218,7 @@ func TestCountWildsOnReel(t *testing.T) {
 		{
 			name: "wilds on different reels",
 			reel: 2,
-			wilds: []*result.WildMultiplier{
+			wilds: []result.WildMultiplier{
 				result.NewWildMultiplier(model.Position{ReelIndex: 0, RowIndex: 0}, 3, 0),
 				result.NewWildMultiplier(model.Position{ReelIndex: 1, RowIndex: 0}, 2, 0),
 				result.NewWildMultiplier(model.Position{ReelIndex: 2, RowIndex: 0}, 5, 0),

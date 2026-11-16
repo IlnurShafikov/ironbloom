@@ -30,7 +30,9 @@ import (
 func (t *Transfer) TransformBaseStep(
 	baseRes *result.Base, allCliSteps []*step.Step, cost, bet uint64,
 ) ([]*step.Step, uint64, error) {
-	clientStep, err := buildBaseStep(baseRes, cost, bet, 0, 0)
+	initFsCount := baseRes.FreeSpinsInitialsCount()
+
+	clientStep, err := buildBaseStep(baseRes, cost, bet, initFsCount)
 	if err != nil {
 		return nil, 0, fmt.Errorf("build base step: %w", err)
 	}
@@ -45,7 +47,7 @@ func (t *Transfer) TransformBaseStep(
 		return nil, 0, fmt.Errorf("marshal step id: %w", err)
 	}
 
-	allCliSteps = append(allCliSteps, makeBaseClientStep(id, data, cost, clientStep, 0))
+	allCliSteps = append(allCliSteps, makeBaseClientStep(id, data, cost, clientStep, initFsCount))
 
 	return allCliSteps, clientStep.TotalWin, nil
 }
@@ -59,16 +61,15 @@ func (t *Transfer) TransformBaseStep(
 //   - cost: the cost of this spin (usually equal to bet)
 //   - betValue: the player's bet amount used to calculate monetary values
 //   - initFsCount: number of free spins triggered by this step (0 if none)
-//   - initRsCount: number of respins triggered by this step (0 if none)
 //
 // Returns:
 //   - pointer to baseDto.Step containing all transformed data
 //   - error if any transformation fails
 func buildBaseStep(
-	baseRes *result.Base, cost, betValue uint64, initFsCount, initRsCount uint32,
+	baseRes *result.Base, cost, betValue uint64, initFsCount uint32,
 ) (*baseDto.Step, error) {
 	// Transform the initial board state before any modifications
-	symbols, err := TransformSymbols(baseRes.Board, betValue)
+	symbols, err := TransformSymbols(baseRes.Board, nil)
 	if err != nil {
 		return nil, fmt.Errorf("transform before symbols: %w", err)
 	}
@@ -83,7 +84,7 @@ func buildBaseStep(
 	totalWin := baseRes.TotalWin() * betValue
 
 	// Build the payload containing all game state information
-	payload := buildBasePayload(eventList, symbols, nil, initFsCount, initRsCount)
+	payload := buildBasePayload(eventList, symbols, initFsCount)
 
 	// Construct and return the complete step DTO
 	return &baseDto.Step{
@@ -103,22 +104,18 @@ func buildBaseStep(
 // Parameters:
 //   - eventList: all game events that occurred during this spin
 //   - symbols: the board state before game logic was applied
-//   - afterSymbols: the board state after game logic was applied
 //   - freeSpinsAdded: number of free spins triggered (0 if none)
-//   - initRsCount: number of respins triggered (0 if none)
 //
 // Returns:
 //   - baseDto.Payload with all game state data populated
 func buildBasePayload(
-	eventList []events.Event, symbols, afterSymbols []*common.Symbol,
-	freeSpinsAdded, initRsCount uint32,
+	eventList []events.Event, symbols []*common.Symbol, freeSpinsAdded uint32,
 ) baseDto.Payload {
 	// Initialize the payload with core game data
 	payload := baseDto.Payload{
 		Events:       eventList,
 		Symbols:      symbols,
-		AfterSymbols: afterSymbols,
-		NextStepType: nextStepTypeFromBase(freeSpinsAdded, initRsCount),
+		NextStepType: nextStepTypeFromBase(freeSpinsAdded),
 		Counter:      nil, // Will be populated only if free spins were triggered
 	}
 
@@ -169,17 +166,15 @@ func makeBaseClientStep(
 //
 // Logic priority:
 //  1. If free spins were triggered → next step is a free spin
-//  2. Else if respins were triggered → next step is a respin
-//  3. Otherwise → next step is another base spin (round complete)
+//  2. Otherwise → next step is another base spin (round complete)
 //
 // Parameters:
 //   - freeSpinsCount: number of free spins triggered by this base spin
-//   - reSpinCount: number of respins triggered by this base spin
 //
 // Returns:
 //   - TYPE_FREE_SPIN if free spins were triggered
 //   - TYPE_BASE_SPIN if neither feature was triggered (normal flow)
-func nextStepTypeFromBase(freeSpinsCount, reSpinCount uint32) int {
+func nextStepTypeFromBase(freeSpinsCount uint32) int {
 	switch {
 	case freeSpinsCount > 0:
 		return rules.Step_TYPE_FREE_SPIN

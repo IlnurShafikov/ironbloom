@@ -53,7 +53,7 @@ func (mr *MockCalculatorsMockRecorder) CalculateWays(board, winLimiter interface
 }
 
 // CalculateWaysWithMultipliers mocks base method.
-func (m *MockCalculators) CalculateWaysWithMultipliers(board model.Board, winLimiter limiter.WinLimiter, wilds []*result.WildMultiplier) (calculators.WaysWins, error) {
+func (m *MockCalculators) CalculateWaysWithMultipliers(board model.Board, winLimiter limiter.WinLimiter, wilds []result.WildMultiplier) (calculators.WaysWins, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "CalculateWaysWithMultipliers", board, winLimiter, wilds)
 	ret0, _ := ret[0].(calculators.WaysWins)
