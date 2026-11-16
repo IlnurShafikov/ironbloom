@@ -8,9 +8,11 @@ import (
 // Free represents the result of a single free spin.
 // It contains all information about the free spin outcome, including events, wins, and retriggers.
 type Free struct {
+	// Board is the board generated for this free spin.
 	Board model.Board
 	// events accumulates all events that occurred during this free spin.
-	events      []events.Event
+	events []events.Event
+	// Multipliers contains the wild symbols of this spin with their multipliers.
 	Multipliers []WildMultiplier
 	// totalWin is the cumulative win amount up to and including this free spin.
 	totalWin uint64

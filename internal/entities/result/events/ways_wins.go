@@ -19,6 +19,14 @@ type WinsEvent struct {
 	WaysWins []WaysWin `json:"ways,omitempty"`
 }
 
+// NewWinsEvent creates a wins event from ways wins.
+// All unique winning positions are collected once and every win refers to them by index.
+//
+// Parameters:
+//   - waysWins: ways wins found on the board
+//
+// Returns:
+//   - pointer to a new WinsEvent
 func NewWinsEvent(
 	waysWins calculators.WaysWins,
 ) *WinsEvent {
@@ -38,16 +46,18 @@ func (c *WinsEvent) EventType() Type {
 	return c.Event
 }
 
+// WaysWin describes a single ways win in the client format.
 type WaysWin struct {
 	// PosIndices contains indices into the Positions array indicating winning positions
 	PosIndices []int `json:"posIndices"`
 
-	// Payout is the win amount for this scatter win
+	// Payout is the win amount for this ways win
 	Payout uint64 `json:"payout"`
 
+	// Ways is the number of ways that formed this win
 	Ways int `json:"ways"`
 
-	// Symbol is the symbol ID that formed the scatter win
+	// Symbol is the symbol ID that formed the ways win
 	Symbol model.Symbol `json:"symbol"`
 }
 

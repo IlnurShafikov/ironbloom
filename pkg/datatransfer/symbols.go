@@ -57,6 +57,12 @@ func transformBoardToSymbols(gameBoard model.Board) []*common.Symbol {
 	return resp
 }
 
+// updateWildWithMultiplier attaches the multiplier property to the client
+// symbols that stand on the positions of the wild symbols.
+//
+// Parameters:
+//   - wildMulti: wild symbols with their multipliers
+//   - symbols: client symbols to update in place
 func updateWildWithMultiplier(
 	wildMulti []result.WildMultiplier,
 	symbols []*common.Symbol,

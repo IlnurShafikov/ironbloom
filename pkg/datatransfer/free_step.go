@@ -3,14 +3,15 @@ package datatransfer
 import (
 	"fmt"
 
+	"github.com/google/uuid"
+	jsoniter "github.com/json-iterator/go"
+
 	"github.com/IlnurShafikov/ironbloom/internal/entities/result"
 	"github.com/IlnurShafikov/ironbloom/internal/entities/result/events"
 	"github.com/IlnurShafikov/ironbloom/internal/entities/rules"
 	"github.com/IlnurShafikov/ironbloom/pkg/datatransfer/dto/common"
 	freeDto "github.com/IlnurShafikov/ironbloom/pkg/datatransfer/dto/free"
 	"github.com/IlnurShafikov/ironbloom/pkg/datatransfer/dto/step"
-	"github.com/google/uuid"
-	jsoniter "github.com/json-iterator/go"
 )
 
 // TransformFreeStep transforms all free spins from a round into client-facing steps.
@@ -51,6 +52,9 @@ func (t *Transfer) TransformFreeStep(
 		}
 
 		allCliSteps = append(allCliSteps, cliStep)
+
+		// TotalWin of a free step is cumulative, so the next step builds on this one.
+		totalRoundWin = cliStep.TotalWin
 
 		finalizeCounter(&counter)
 

@@ -3,10 +3,11 @@ package calculator
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/IlnurShafikov/ironbloom/internal/entities/result"
 	"github.com/IlnurShafikov/slot-engine/pkg/calculators"
 	"github.com/IlnurShafikov/slot-engine/pkg/model"
-	"github.com/stretchr/testify/require"
 )
 
 func TestWithWaysWinMultiplier(t *testing.T) {

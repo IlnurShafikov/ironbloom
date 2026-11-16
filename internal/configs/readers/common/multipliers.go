@@ -51,6 +51,15 @@ func ReadMultipliers(
 	}, nil
 }
 
+// readWildMultipliers reads the wild symbol ID to multiplier mapping.
+//
+// Parameters:
+//   - csvReader: CSV file adapter for reading configuration files
+//   - generalPath: path builder pointing to the general configuration directory
+//
+// Returns:
+//   - pairs of wild symbol ID and its multiplier
+//   - error if reading or parsing fails
 func readWildMultipliers(
 	csvReader *reader.Adapter,
 	generalPath *tools.PathBuilder,

@@ -11,10 +11,13 @@ import (
 
 const (
 	// generalPrefix defines the directory name for general configuration files
-	generalPrefix        = "general"
+	generalPrefix = "general"
+	// baseSymbolOnReelName is the CSV file name for the per-reel symbol counts in base phase.
 	baseSymbolOnReelName = "base_symbols_on_reel"
+	// freeSymbolOnReelName is the CSV file name for the per-reel symbol counts in free phase.
 	freeSymbolOnReelName = "free_symbols_on_reel"
-	wildIDsName          = "wild_ids"
+	// wildIDsName is the CSV file name that lists the wild symbol IDs.
+	wildIDsName = "wild_ids"
 )
 
 // Read loads and parses the general game configuration.
@@ -34,12 +37,14 @@ func Read(csvReader *reader.Adapter) (*configs.GeneralConfig, error) {
 		return nil, fmt.Errorf("read paytable: %w", err)
 	}
 
-	baseSymbolsOnReel, err := common.ReadIntSlices(csvReader, generalPath.File(baseSymbolOnReelName))
+	baseSymbolsOnReel, err := common.ReadIntSlices(
+		csvReader, generalPath.File(baseSymbolOnReelName))
 	if err != nil {
 		return nil, fmt.Errorf("read base symbols on reel: %w", err)
 	}
 
-	freeSymbolsOnReel, err := common.ReadIntSlices(csvReader, generalPath.File(freeSymbolOnReelName))
+	freeSymbolsOnReel, err := common.ReadIntSlices(
+		csvReader, generalPath.File(freeSymbolOnReelName))
 	if err != nil {
 		return nil, fmt.Errorf("read free symbols on reel: %w", err)
 	}

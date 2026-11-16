@@ -15,22 +15,25 @@ type GeneralConfig struct {
 	// Multipliers contains various multiplier configurations (cost, max win, etc.)
 	Multipliers *MultipliersConfigs
 
+	// Volatility represents the game's volatility setting, affecting risk and payout frequency.
+	Volatility string
+
+	// FsInitCounter maps the number of scatter symbols to the number of free spins awarded.
+	FsInitCounter fscounter.FSInitCounter
+
 	// BaseSymbolsOnReels is the number of visible symbol rows per reel in base phase.
 	BaseSymbolsOnReels []int
 
 	// FreeSymbolsOnReels is the number of visible symbol rows per reel in free phase.
 	FreeSymbolsOnReels []int
 
+	// WildIDs lists the symbol IDs that act as wilds and carry a multiplier.
 	WildIDs []int
-
-	FsInitCounter fscounter.FSInitCounter
-
-	// Volatility represents the game's volatility setting, affecting risk and payout frequency.
-	Volatility string
 }
 
 // MultipliersConfigs contains all multiplier-related configuration values.
 type MultipliersConfigs struct {
+	// WildMultipliers maps a wild symbol ID to its multiplier value.
 	WildMultipliers pairs.Pairs
 
 	// MaxWinMultiplier defines the maximum win as a multiplier of the bet

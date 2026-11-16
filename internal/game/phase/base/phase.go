@@ -18,7 +18,7 @@ import (
 	"github.com/IlnurShafikov/slot-engine/pkg/weight"
 )
 
-// / SpinPhase represents the base game spin phase with all its components.
+// SpinPhase represents the base game spin phase with all its components.
 // It contains the game mechanics and configurations needed to execute a base spin.
 type SpinPhase struct {
 	// gen produces raw reel boards for a given group ID.
@@ -27,6 +27,7 @@ type SpinPhase struct {
 	// dist define the weighted symbol distributions for reels
 	dist *weight.Weights
 
+	// calc evaluates ways wins on the board.
 	calc calculator.Calculators
 
 	// fSInitCounter determines initial free spins count
@@ -124,6 +125,14 @@ func (b *SpinPhase) processWin(
 	return winLimiter.TotalWin(), nil
 }
 
+// checkBonusTrigger sets the number of free spins awarded by scatter symbols
+// on the board. Nothing is changed when the scatters do not trigger the bonus.
+//
+// Parameters:
+//   - res: result of the current base spin
+//
+// Returns:
+//   - error if the free spins count cannot be converted to uint32
 func (b *SpinPhase) checkBonusTrigger(
 	res *result.Base,
 ) error {

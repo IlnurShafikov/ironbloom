@@ -1,3 +1,5 @@
+// Package free implements the free spins phase logic.
+// The free phase runs the bonus spins awarded by the base phase and by retriggers.
 package free
 
 import (
@@ -22,30 +24,63 @@ import (
 // spins plus a typical number of retriggers.
 const freeSpinsCapacityFactor = 2
 
+// SpinPhase represents the free spins phase with all its components.
+// It contains the game mechanics and configurations needed to execute free spins.
 type SpinPhase struct {
-	generator     *generator.Generator
+	// generator produces raw reel boards for a given group ID.
+	generator *generator.Generator
+
+	// distributions define the weighted reel groups used for free spins.
 	distributions *weight.Weights
+
+	// multiplierGen finds wild symbols on the board and assigns their multipliers.
 	multiplierGen wild.WildsMultiplierGetter
-	calculators   calculator.Calculators
+
+	// calculators evaluates ways wins on the board.
+	calculators calculator.Calculators
+
+	// fSInitCounter determines the number of free spins awarded for scatters.
 	fSInitCounter fscounter.FSInitCounter
 }
 
+// NewSpinPhase creates a new free spins phase with the specified components.
+//
+// Parameters:
+//   - gen: board generator for free spins
+//   - distributions: weighted reel groups used for free spins
+//   - multiplierGen: wild multiplier getter
+//   - calc: ways wins calculator
+//   - fSInitCounter: scatter count to free spins count mapping
+//
+// Returns:
+//   - pointer to a new SpinPhase instance
 func NewSpinPhase(
-	generator *generator.Generator,
+	gen *generator.Generator,
 	distributions *weight.Weights,
 	multiplierGen wild.WildsMultiplierGetter,
-	calculators calculator.Calculators,
+	calc calculator.Calculators,
 	fSInitCounter fscounter.FSInitCounter,
 ) *SpinPhase {
 	return &SpinPhase{
-		generator:     generator,
+		generator:     gen,
 		distributions: distributions,
 		multiplierGen: multiplierGen,
-		calculators:   calculators,
+		calculators:   calc,
 		fSInitCounter: fSInitCounter,
 	}
 }
 
+// Spins executes all free spins, including the ones added by retriggers.
+// The phase stops early when the max win is reached.
+//
+// Parameters:
+//   - rng: random number generator
+//   - fsCount: initial number of free spins
+//   - winLimiter: limiter that tracks the total win and the max win limit
+//
+// Returns:
+//   - results of every executed free spin
+//   - error if any spin fails
 func (f *SpinPhase) Spins(
 	rng model.RNG,
 	fsCount uint32,
@@ -53,6 +88,7 @@ func (f *SpinPhase) Spins(
 ) ([]*result.Free, error) {
 	allRes := make([]*result.Free, 0, fsCount*freeSpinsCapacityFactor)
 
+	//nolint:intrange // fsCount grows on retriggers, so the bound is re-evaluated every iteration
 	for fsIndex := 0; fsIndex < int(fsCount); fsIndex++ {
 		fsResult, err := f.spin(rng, winLimiter)
 		if err != nil {
@@ -71,6 +107,16 @@ func (f *SpinPhase) Spins(
 	return allRes, nil
 }
 
+// spin executes a single free spin: it picks a reel group, generates the board,
+// finds wild multipliers, calculates wins and checks for a retrigger.
+//
+// Parameters:
+//   - rng: random number generator
+//   - winLimiter: limiter that tracks the total win and the max win limit
+//
+// Returns:
+//   - result of the spin
+//   - error if any step of the spin fails
 func (f *SpinPhase) spin(
 	rng model.RNG,
 	winLimiter limiter.WinLimiter,
@@ -112,6 +158,17 @@ func (f *SpinPhase) spin(
 	return res, nil
 }
 
+// processWin calculates ways wins of the spin taking wild multipliers into
+// account and records the wins event.
+//
+// Parameters:
+//   - res: result of the current spin
+//   - eventer: collector of the spin events
+//   - winLimiter: limiter that tracks the total win and the max win limit
+//
+// Returns:
+//   - total win of the spin
+//   - error if the calculation fails
 func (f *SpinPhase) processWin(
 	res *result.Free,
 	eventer *collectors.EventsCollector,
@@ -132,6 +189,15 @@ func (f *SpinPhase) processWin(
 	return stepWin, nil
 }
 
+// checkRetrigger sets the number of additional free spins awarded by scatter
+// symbols on the board. Nothing is awarded when the max win is reached.
+//
+// Parameters:
+//   - res: result of the current spin
+//   - winLimiter: limiter that tracks the max win limit
+//
+// Returns:
+//   - error if the free spins count cannot be converted to uint32
 func (f *SpinPhase) checkRetrigger(res *result.Free, winLimiter limiter.WinLimiter) error {
 	if winLimiter.MaxWinReached() {
 		return nil
@@ -150,6 +216,13 @@ func (f *SpinPhase) checkRetrigger(res *result.Free, winLimiter limiter.WinLimit
 	return nil
 }
 
+// stepWinInWaysWins sums the total payouts of all ways wins.
+//
+// Parameters:
+//   - wins: ways wins of the spin
+//
+// Returns:
+//   - sum of the payouts, 0 when there are no wins
 func stepWinInWaysWins(wins calculators.WaysWins) uint64 {
 	if len(wins) == 0 {
 		return 0

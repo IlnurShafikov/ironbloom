@@ -59,6 +59,18 @@ func readFreePhase(
 	return spinPhase, nil
 }
 
+// readFreeReelsGenerator reads reel-strip data for every trigger group and
+// builds the board generator used for free spins.
+//
+// Parameters:
+//   - csvReader: CSV file adapter backed by the embedded config FS
+//   - phasePath: path builder pointing to the free phase directory
+//   - general: shared game configuration supplying the per-reel symbol counts
+//   - groupIDs: group IDs for which reel files must be loaded
+//
+// Returns:
+//   - pointer to Generator with all group reel strips loaded
+//   - error if any reel file cannot be read or the generator cannot be initialised
 func readFreeReelsGenerator(
 	csvReader *reader.Adapter,
 	phasePath *tools.PathBuilder,

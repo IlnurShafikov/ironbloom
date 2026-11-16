@@ -39,6 +39,8 @@ func getMinMax[T Number]() (minVal, maxVal float64) {
 	return 0, 0
 }
 
+// getSignedMinMax returns the bounds of a signed integer type as float64.
+// It returns (0, 0) for any other type.
 func getSignedMinMax[T Number]() (minVal, maxVal float64) {
 	var zero T
 
@@ -58,6 +60,8 @@ func getSignedMinMax[T Number]() (minVal, maxVal float64) {
 	return 0, 0
 }
 
+// getUnsignedMinMax returns the bounds of an unsigned integer type as float64.
+// It returns (0, 0) for any other type.
 func getUnsignedMinMax[T Number]() (minVal, maxVal float64) {
 	var zero T
 
@@ -77,6 +81,8 @@ func getUnsignedMinMax[T Number]() (minVal, maxVal float64) {
 	return 0, 0
 }
 
+// getFloatMinMax returns the bounds of a floating-point type as float64.
+// It returns (0, 0) for any other type.
 func getFloatMinMax[T Number]() (minVal, maxVal float64) {
 	var zero T
 

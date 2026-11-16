@@ -61,10 +61,10 @@ func readBasePhase(
 //   - general: shared game configuration supplying paytable, win lines, and symbol IDs
 //
 // Returns:
-//   - pointer to Calculator ready to evaluate line wins on base-game boards
+//   - pointer to Calculator ready to evaluate ways wins
 func readWaysCalculator(
 	general *configs.GeneralConfig,
-) calculator.Calculators {
+) *calculator.Calculator {
 	wilds := make(model.Collection, 0, len(general.WildIDs))
 	wilds = append(wilds, general.WildIDs...)
 

@@ -1,4 +1,3 @@
-//nolint:all // it's ok for enter step
 package datatransfer
 
 import (
@@ -122,6 +121,7 @@ func initialPayload(clientSymbols []*common.Symbol) base.Payload {
 	}
 }
 
+// initBoard returns the fixed board shown to the player before the first spin.
 func initBoard() model.Board {
 	return model.Board{
 		{rules.Ace, rules.High1, rules.High2},

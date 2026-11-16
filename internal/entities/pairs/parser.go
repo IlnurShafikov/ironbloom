@@ -5,6 +5,15 @@ import (
 	"strconv"
 )
 
+// Parse converts CSV rows into pairs. The first column of a row is the key,
+// the second one is the value; extra columns are ignored.
+//
+// Parameters:
+//   - data: CSV rows, each with at least two integer columns
+//
+// Returns:
+//   - parsed pairs in the order of the rows
+//   - error if a row is too short or contains a non-integer value
 func Parse(data [][]string) (Pairs, error) {
 	const minLength = 2
 

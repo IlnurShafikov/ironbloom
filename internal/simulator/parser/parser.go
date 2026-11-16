@@ -9,6 +9,7 @@ import (
 
 // RoundParser processes round results and accumulates simulation statistics
 type RoundParser struct {
+	// res accumulates the statistics of all processed rounds.
 	res *result.Result
 }
 

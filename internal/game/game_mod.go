@@ -10,11 +10,13 @@ import (
 
 // BasePhase defines the interface for base game phase operations
 type BasePhase interface {
+	// Spin executes a single base game spin.
 	Spin(rng model.RNG, winLimiter limiter.WinLimiter) (*result.Base, error)
 }
 
 // FreePhase defines the interface for free spins phase operations
 type FreePhase interface {
+	// Spins executes all free spins, including the ones added by retriggers.
 	Spins(
 		rng model.RNG,
 		fsCount uint32,
