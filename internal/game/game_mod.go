@@ -13,20 +13,48 @@ type BasePhase interface {
 	Spin(rng model.RNG, winLimiter limiter.WinLimiter) (*result.Base, error)
 }
 
-// Mod represents a complete game modification with base and free spin phases
-type Mod struct {
-	baseSpinPhase  BasePhase
-	costMultiplier uint64
-	maxWinLimit    uint64
+// FreePhase defines the interface for free spins phase operations
+type FreePhase interface {
+	Spins(
+		rng model.RNG,
+		fsCount uint32,
+		winLimiter limiter.WinLimiter,
+	) ([]*result.Free, error)
 }
 
-// NewMod creates a new Mod instance with the specified phases and limits
+// Mod represents a complete game modification with base and free spin phases
+type Mod struct {
+	// baseSpinPhase handles base game spin logic
+	baseSpinPhase BasePhase
+
+	// freeSpinPhase handles free spins logic
+	freeSpinPhase FreePhase
+
+	// costMultiplier is the multiplier applied to bet values
+	costMultiplier uint64
+
+	// maxWinLimit is the maximum win amount allowed per round
+	maxWinLimit uint64
+}
+
+// NewMod creates a new Mod instance with the specified phases and limits.
+//
+// Parameters:
+//   - basePhase: base game phase implementation
+//   - freeSpinPhase: free spins phase implementation
+//   - costMultiplier: multiplier for bet values
+//   - maxWinLimit: maximum win amount allowed per round
+//
+// Returns:
+//   - pointer to the newly created Mod
 func NewMod(
 	basePhase BasePhase,
+	freeSpinPhase FreePhase,
 	costMultiplier, maxWinLimit uint64,
 ) *Mod {
 	return &Mod{
 		baseSpinPhase:  basePhase,
+		freeSpinPhase:  freeSpinPhase,
 		costMultiplier: costMultiplier,
 		maxWinLimit:    maxWinLimit,
 	}
@@ -50,6 +78,10 @@ func (g *Mod) Spin(rng model.RNG) (*result.Round, error) {
 		return nil, fmt.Errorf("execute base phase: %w", err)
 	}
 
+	if err := g.startFreePhaseIfTriggered(rng, roundResult, winLimiter); err != nil {
+		return nil, fmt.Errorf("execute free phase: %w", err)
+	}
+
 	return roundResult, nil
 }
 
@@ -63,6 +95,25 @@ func (g *Mod) startBasePhase(
 	}
 
 	roundResult.BasePhase = baseResult
+
+	return nil
+}
+
+// startFreePhaseIfTriggered checks for free spin triggers and executes the free spin phase
+func (g *Mod) startFreePhaseIfTriggered(
+	rng model.RNG, roundResult *result.Round, winLimiter limiter.WinLimiter,
+) error {
+	fsCount := roundResult.BasePhase.FreeSpinsInitialsCount()
+	if fsCount == 0 {
+		return nil // No free spins triggered
+	}
+
+	freeResults, err := g.freeSpinPhase.Spins(rng, fsCount, winLimiter)
+	if err != nil {
+		return fmt.Errorf("spin free games (count: %d): %w", fsCount, err)
+	}
+
+	roundResult.FreePhase = freeResults
 
 	return nil
 }

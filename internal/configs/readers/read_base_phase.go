@@ -3,8 +3,10 @@ package readers
 import (
 	"fmt"
 
+	"github.com/IlnurShafikov/ironbloom/internal/components/calculator"
 	"github.com/IlnurShafikov/ironbloom/internal/configs"
 	"github.com/IlnurShafikov/ironbloom/internal/configs/readers/common"
+	"github.com/IlnurShafikov/ironbloom/internal/entities/rules"
 	"github.com/IlnurShafikov/ironbloom/internal/game/phase/base"
 	"github.com/IlnurShafikov/ironbloom/internal/tools"
 	"github.com/IlnurShafikov/slot-engine/pkg/calculators"
@@ -44,14 +46,14 @@ func readBasePhase(
 		return nil, fmt.Errorf("read base reel generator: %w", err)
 	}
 
-	lineCalculator := readLineCalculator(general)
+	waysCalculator := readWaysCalculator(general)
 
-	spinPhase := base.NewSpinPhase(dist, gen, lineCalculator)
+	spinPhase := base.NewSpinPhase(dist, gen, waysCalculator, general.FsInitCounter)
 
 	return spinPhase, nil
 }
 
-// readLineCalculator constructs the line-win calculator from the shared general
+// readWaysCalculator constructs the line-win calculator from the shared general
 // configuration. Wild and non-scoring symbols (coin, collector) are registered
 // so the evaluator handles substitutions and skips correctly.
 //
@@ -60,19 +62,17 @@ func readBasePhase(
 //
 // Returns:
 //   - pointer to Calculator ready to evaluate line wins on base-game boards
-func readLineCalculator(
+func readWaysCalculator(
 	general *configs.GeneralConfig,
-) *calculators.Lines {
-	wild := model.Collection{}
-	skipSymbol := model.Collection{}
+) calculator.Calculators {
+	wilds := make(model.Collection, 0, len(general.WildIDs))
+	wilds = append(wilds, general.WildIDs...)
 
-	linesCalc := calculators.NewLines(
-		general.PayTable,
-		general.WinLines,
-		wild,
-		skipSymbol)
+	skipSymbol := model.Collection{rules.ScatterID}
 
-	return linesCalc
+	waysCalculators := calculators.NewWays(general.PayTable, wilds, skipSymbol)
+
+	return calculator.NewCalculator(waysCalculators)
 }
 
 // readBaseReelsGenerator reads reel-strip data for every trigger group and
@@ -98,7 +98,7 @@ func readBaseReelsGenerator(
 		return nil, fmt.Errorf("read reels: %w", err)
 	}
 
-	reelGen, err := generator.NewReelsGenerator(reels, general.SymbolsOnReels)
+	reelGen, err := generator.NewReelsGenerator(reels, general.BaseSymbolsOnReels)
 	if err != nil {
 		return nil, fmt.Errorf("make base board generator: %w", err)
 	}

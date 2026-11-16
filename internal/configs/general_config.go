@@ -1,8 +1,9 @@
 package configs
 
 import (
-	"github.com/IlnurShafikov/slot-engine/pkg/lines"
+	"github.com/IlnurShafikov/ironbloom/internal/entities/pairs"
 	"github.com/IlnurShafikov/slot-engine/pkg/paytable"
+	"github.com/IlnurShafikov/slot-engine/pkg/tools/fscounter"
 )
 
 // GeneralConfig holds the general game configuration that is shared across all game modes.
@@ -14,18 +15,24 @@ type GeneralConfig struct {
 	// Multipliers contains various multiplier configurations (cost, max win, etc.)
 	Multipliers *MultipliersConfigs
 
-	// SymbolsOnReels is the number of visible symbol rows per reel.
-	SymbolsOnReels []int
+	// BaseSymbolsOnReels is the number of visible symbol rows per reel in base phase.
+	BaseSymbolsOnReels []int
+
+	// FreeSymbolsOnReels is the number of visible symbol rows per reel in free phase.
+	FreeSymbolsOnReels []int
+
+	WildIDs []int
+
+	FsInitCounter fscounter.FSInitCounter
 
 	// Volatility represents the game's volatility setting, affecting risk and payout frequency.
 	Volatility string
-
-	// WinLines defines the cell-position patterns that form paying line combinations.
-	WinLines lines.Lines
 }
 
 // MultipliersConfigs contains all multiplier-related configuration values.
 type MultipliersConfigs struct {
+	WildMultipliers pairs.Pairs
+
 	// MaxWinMultiplier defines the maximum win as a multiplier of the bet
 	MaxWinMultiplier uint64
 

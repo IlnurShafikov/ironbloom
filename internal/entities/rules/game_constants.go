@@ -34,6 +34,8 @@ const (
 
 	// Jack represents the Jack card symbol (low-paying)
 	Jack = 9
+
+	ScatterID = 11
 )
 
 // Game mechanics constants

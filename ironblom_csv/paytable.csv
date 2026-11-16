@@ -1,0 +1,12 @@
+# First column is the symbol ID, first row is the number of matching reels (left to right) needed for the payout
+# Values are payouts per way in units (total bet = 20 units); 0 = no payout. Symbol 1 pays from 2 reels, symbols 2-9 from 3 reels
+-,1,2,3,4,5
+1,0,5,25,80,300
+2,0,0,18,70,250
+3,0,0,14,50,180
+4,0,0,10,36,110
+5,0,0,6,16,50
+6,0,0,5,12,36
+7,0,0,4,10,28
+8,0,0,3,8,22
+9,0,0,2,6,16
