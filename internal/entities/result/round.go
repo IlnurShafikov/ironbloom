@@ -8,6 +8,9 @@ type Round struct {
 	// BasePhase contains the result of the base game spin
 	BasePhase *Base
 
+	// FreePhase contains the results of all free spins of the round
+	FreePhase []*Free
+
 	// CostMultiplier is the cost multiplier for this round, not including the player's bet level
 	CostMultiplier uint64
 
@@ -27,6 +30,7 @@ func NewRound(
 ) *Round {
 	return &Round{
 		BasePhase:      nil,
+		FreePhase:      nil,
 		CostMultiplier: costMultiplier,
 		Seed:           0,
 	}

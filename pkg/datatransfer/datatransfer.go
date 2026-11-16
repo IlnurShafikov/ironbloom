@@ -42,17 +42,28 @@ func NewTransfer(
 //   - pointer to BetResult containing all transformed steps
 //   - error if transformation fails
 func (t *Transfer) Transfer(res *result.Round, betValue uint64) (*step.BetResult, error) {
-	var err error
+	var (
+		totalRoundWin uint64
+		err           error
+	)
 
 	// Pre-allocate slice with estimated capacity for all steps
 	allCliSteps := make([]*step.Step, 0, 1)
 	roundCost := res.CostMultiplier * betValue
 
 	// Transform the base game spin
-	allCliSteps, _, err = t.TransformBaseStep(
+	allCliSteps, totalRoundWin, err = t.TransformBaseStep(
 		res.BasePhase, allCliSteps, roundCost, betValue)
 	if err != nil {
 		return nil, fmt.Errorf("transfer base step: %w", err)
+	}
+
+	// Transform free spins if any were triggered
+	allCliSteps, err = t.TransformFreeStep(
+		res, allCliSteps, totalRoundWin, betValue,
+	)
+	if err != nil {
+		return nil, fmt.Errorf("transfer free steps: %w", err)
 	}
 
 	// Construct the final bet result

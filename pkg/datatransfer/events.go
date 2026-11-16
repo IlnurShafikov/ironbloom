@@ -4,6 +4,7 @@ import "github.com/IlnurShafikov/ironbloom/internal/entities/result/events"
 
 // stepEventProvider is implemented by any game step that exposes its events.
 type stepEventProvider interface {
+	// Events returns the events of the step.
 	Events() []events.Event
 }
 
@@ -32,29 +33,27 @@ func transformSingleEvent(curEvent events.Event, betValue uint64) error {
 	switch curEvent.EventType() {
 	case events.WinsType:
 		return transformWinEvent(curEvent, betValue)
-	case events.WinType, events.JpTransformType, events.DoubleWins:
-		return ErrInvalidEventType
 	default:
 		return ErrInvalidEventType
 	}
 }
 
-// transformWinEvent transforms a line wins event by multiplying payouts by bet value.
+// transformWinEvent transforms a ways wins event by multiplying payouts by bet value.
 //
 // Parameters:
-//   - curEvent: the event to transform (must be *events.LineWinsEvent)
+//   - curEvent: the event to transform (must be *events.WinsEvent)
 //   - betValue: the player's bet value
 //
 // Returns:
 //   - error if the event is not the correct type
 func transformWinEvent(curEvent events.Event, betValue uint64) error {
-	winEvent, ok := curEvent.(*events.LineWinsEvent)
+	winEvent, ok := curEvent.(*events.WinsEvent)
 	if !ok {
 		return ErrInvalidEventType
 	}
 
-	for i := range winEvent.Lines {
-		winEvent.Lines[i].Payout *= betValue
+	for i := range winEvent.WaysWins {
+		winEvent.WaysWins[i].Payout *= betValue
 	}
 
 	return nil

@@ -20,6 +20,9 @@ type Base struct {
 	// totalWin is the total win amount from this base spin (excluding respins/free spins)
 	totalWin uint64
 
+	// freeSpinsInitials is the number of free spins awarded when the feature is triggered.
+	freeSpinsInitials uint32
+
 	// maxWinReached indicates if the maximum win limit was reached
 	maxWinReached bool
 }
@@ -28,12 +31,13 @@ type Base struct {
 //
 // Returns:
 //   - pointer to a new Base instance
-func NewBase() *Base {
+func NewBase(board model.Board) *Base {
 	return &Base{
-		Board:         nil,
-		events:        nil,
-		totalWin:      0,
-		maxWinReached: false,
+		Board:             board,
+		events:            nil,
+		totalWin:          0,
+		freeSpinsInitials: 0,
+		maxWinReached:     false,
 	}
 }
 
@@ -43,6 +47,14 @@ func NewBase() *Base {
 //   - e: slice of events to set
 func (b *Base) SetEvents(e []events.Event) {
 	b.events = e
+}
+
+// SetFreeSpinsInitialsCount sets the number of free spins triggered.
+//
+// Parameters:
+//   - count: number of free spins triggered
+func (b *Base) SetFreeSpinsInitialsCount(count uint32) {
+	b.freeSpinsInitials = count
 }
 
 // SetTotalWin sets the total win amount for this spin.
@@ -67,6 +79,14 @@ func (b *Base) SetMaxWinReached(reached bool) {
 //   - slice of events
 func (b *Base) Events() []events.Event {
 	return b.events
+}
+
+// FreeSpinsInitialsCount returns the number of free spins triggered.
+//
+// Returns:
+//   - number of free spins
+func (b *Base) FreeSpinsInitialsCount() uint32 {
+	return b.freeSpinsInitials
 }
 
 // TotalWin returns the total win amount for this spin.

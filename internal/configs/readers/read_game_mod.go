@@ -21,6 +21,7 @@ const (
 
 // gameModsData holds all game mode configurations for a specific RTP version.
 type gameModsData struct {
+	// simple is the simple (single bet) game mode.
 	simple *game.Mod
 }
 
@@ -126,7 +127,12 @@ func readGameMod(
 		return nil, fmt.Errorf("read base config: %w", err)
 	}
 
-	gameMod := game.NewMod(basePhase, costMultiplier, generalCfg.MaxWinLimit())
+	freePhase, err := readFreePhase(csvReader, modPath, generalCfg)
+	if err != nil {
+		return nil, fmt.Errorf("read free config: %w", err)
+	}
+
+	gameMod := game.NewMod(basePhase, freePhase, costMultiplier, generalCfg.MaxWinLimit())
 
 	return gameMod, nil
 }

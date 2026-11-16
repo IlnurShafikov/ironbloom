@@ -12,8 +12,12 @@ import (
 const (
 	// generalPrefix defines the directory name for general configuration files
 	generalPrefix = "general"
-	// symbolOnReelName is the CSV file name for the per-reel visible symbol counts.
-	symbolOnReelName = "symbols_on_reel"
+	// baseSymbolOnReelName is the CSV file name for the per-reel symbol counts in base phase.
+	baseSymbolOnReelName = "base_symbols_on_reel"
+	// freeSymbolOnReelName is the CSV file name for the per-reel symbol counts in free phase.
+	freeSymbolOnReelName = "free_symbols_on_reel"
+	// wildIDsName is the CSV file name that lists the wild symbol IDs.
+	wildIDsName = "wild_ids"
 )
 
 // Read loads and parses the general game configuration.
@@ -33,19 +37,31 @@ func Read(csvReader *reader.Adapter) (*configs.GeneralConfig, error) {
 		return nil, fmt.Errorf("read paytable: %w", err)
 	}
 
-	symbolsOnReel, err := common.ReadIntSlices(csvReader, generalPath.File(symbolOnReelName))
+	baseSymbolsOnReel, err := common.ReadIntSlices(
+		csvReader, generalPath.File(baseSymbolOnReelName))
 	if err != nil {
-		return nil, fmt.Errorf("read symbols on reel: %w", err)
+		return nil, fmt.Errorf("read base symbols on reel: %w", err)
 	}
 
-	winLines, err := common.ReadLines(csvReader, generalPath)
+	freeSymbolsOnReel, err := common.ReadIntSlices(
+		csvReader, generalPath.File(freeSymbolOnReelName))
 	if err != nil {
-		return nil, fmt.Errorf("read win lines: %w", err)
+		return nil, fmt.Errorf("read free symbols on reel: %w", err)
+	}
+
+	wildIDs, err := common.ReadIntSlices(csvReader, generalPath.File(wildIDsName))
+	if err != nil {
+		return nil, fmt.Errorf("read wild ids: %w", err)
 	}
 
 	multipliers, err := common.ReadMultipliers(csvReader, generalPath)
 	if err != nil {
 		return nil, fmt.Errorf("read multipliers: %w", err)
+	}
+
+	fsInitCounter, err := common.ReadFsInitCounter(csvReader, generalPath)
+	if err != nil {
+		return nil, fmt.Errorf("read fs init counter: %w", err)
 	}
 
 	volatility, err := common.ReadVolatility(csvReader, generalPath)
@@ -54,10 +70,12 @@ func Read(csvReader *reader.Adapter) (*configs.GeneralConfig, error) {
 	}
 
 	return &configs.GeneralConfig{
-		PayTable:       paytable,
-		Multipliers:    multipliers,
-		SymbolsOnReels: symbolsOnReel,
-		WinLines:       winLines,
-		Volatility:     volatility,
+		PayTable:           paytable,
+		Multipliers:        multipliers,
+		BaseSymbolsOnReels: baseSymbolsOnReel,
+		FreeSymbolsOnReels: freeSymbolsOnReel,
+		WildIDs:            wildIDs,
+		FsInitCounter:      fsInitCounter,
+		Volatility:         volatility,
 	}, nil
 }

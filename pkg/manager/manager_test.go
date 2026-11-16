@@ -81,6 +81,8 @@ func TestAllGameMods(t *testing.T) {
 	}
 }
 
+// TestGameManager_GetRoundResult_Payout checks that the total win sent to the client
+// equals the total win of the internal round result scaled by the bet.
 func TestGameManager_GetRoundResult_Payout(t *testing.T) {
 	gameManager, err := manager.NewGameManager()
 	require.NoError(t, err)
@@ -111,6 +113,7 @@ func TestGameManager_GetRoundResult_Payout(t *testing.T) {
 
 // calculateRawTotalWin calculates the total win from the internal game result
 // before it's been transformed or scaled by bet value.
+// The total win is cumulative, so it is taken from the last executed phase.
 //
 // Parameters:
 //   - roundRes: the internal round result from the game engine
@@ -118,15 +121,16 @@ func TestGameManager_GetRoundResult_Payout(t *testing.T) {
 // Returns:
 //   - total win amount (in base units, not scaled by bet)
 func calculateRawTotalWin(roundRes *result.Round) uint64 {
-	var totalWin uint64
+	if freeSpins := roundRes.FreePhase; len(freeSpins) > 0 {
+		return freeSpins[len(freeSpins)-1].TotalWin()
+	}
 
-	totalWin += roundRes.BasePhase.TotalWin()
-
-	return totalWin
+	return roundRes.BasePhase.TotalWin()
 }
 
 // calculateTransferTotalWin calculates the total win from the transformed
 // client-facing steps. This value should be scaled by the bet value.
+// The total win of a step is cumulative, so it is taken from the last step.
 //
 // Parameters:
 //   - allSteps: slice of transformed steps sent to the client
@@ -134,13 +138,11 @@ func calculateRawTotalWin(roundRes *result.Round) uint64 {
 // Returns:
 //   - total win amount (already scaled by bet value)
 func calculateTransferTotalWin(allSteps []*step.Step) uint64 {
-	var totalWin uint64
-
-	for _, step := range allSteps {
-		totalWin += step.TotalWin
+	if len(allSteps) == 0 {
+		return 0
 	}
 
-	return totalWin
+	return allSteps[len(allSteps)-1].TotalWin
 }
 
 // seed generates a non-zero seed based on the current time.

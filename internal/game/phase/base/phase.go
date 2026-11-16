@@ -5,17 +5,20 @@ package base
 import (
 	"fmt"
 
+	"github.com/IlnurShafikov/ironbloom/internal/components/calculator"
 	"github.com/IlnurShafikov/ironbloom/internal/components/collectors"
 	"github.com/IlnurShafikov/ironbloom/internal/components/limiter"
 	"github.com/IlnurShafikov/ironbloom/internal/entities/result"
 	"github.com/IlnurShafikov/ironbloom/internal/entities/result/events"
-	"github.com/IlnurShafikov/slot-engine/pkg/calculators"
+	"github.com/IlnurShafikov/ironbloom/internal/entities/rules"
+	"github.com/IlnurShafikov/ironbloom/internal/tools/cast"
 	"github.com/IlnurShafikov/slot-engine/pkg/generator"
 	"github.com/IlnurShafikov/slot-engine/pkg/model"
+	"github.com/IlnurShafikov/slot-engine/pkg/tools/fscounter"
 	"github.com/IlnurShafikov/slot-engine/pkg/weight"
 )
 
-// / SpinPhase represents the base game spin phase with all its components.
+// SpinPhase represents the base game spin phase with all its components.
 // It contains the game mechanics and configurations needed to execute a base spin.
 type SpinPhase struct {
 	// gen produces raw reel boards for a given group ID.
@@ -24,26 +27,27 @@ type SpinPhase struct {
 	// dist define the weighted symbol distributions for reels
 	dist *weight.Weights
 
-	calc *calculators.Lines
+	// calc evaluates ways wins on the board.
+	calc calculator.Calculators
+
+	// fSInitCounter determines initial free spins count
+	fSInitCounter fscounter.FSInitCounter
 }
 
 // NewSpinPhase creates a new base game spin phase with the specified components.
-//
-// Parameters:
-//   - dist: symbol distributions for the reels
-//   - weightsGroup: weighted value groups for game mechanics
-//
 // Returns:
 //   - pointer to a new SpinPhase instance
 func NewSpinPhase(
 	dist *weight.Weights,
 	gen *generator.Generator,
-	calc *calculators.Lines,
+	calc calculator.Calculators,
+	fSInitCounter fscounter.FSInitCounter,
 ) *SpinPhase {
 	return &SpinPhase{
-		dist: dist,
-		gen:  gen,
-		calc: calc,
+		dist:          dist,
+		gen:           gen,
+		calc:          calc,
+		fSInitCounter: fSInitCounter,
 	}
 }
 
@@ -62,7 +66,6 @@ func (b *SpinPhase) Spin(
 	winLimiter limiter.WinLimiter,
 ) (*result.Base, error) {
 	eventer := collectors.NewEvents()
-	res := result.NewBase()
 
 	groupID, err := b.dist.GetRandomValue(rng)
 	if err != nil {
@@ -79,7 +82,13 @@ func (b *SpinPhase) Spin(
 		return nil, fmt.Errorf("process win: %w", err)
 	}
 
-	res.Board = board
+	res := result.NewBase(board)
+
+	err = b.checkBonusTrigger(res)
+	if err != nil {
+		return nil, fmt.Errorf("check bonus trigger: %w", err)
+	}
+
 	res.SetTotalWin(totalWin)
 	res.SetMaxWinReached(winLimiter.MaxWinReached())
 	res.SetEvents(eventer.Get())
@@ -87,7 +96,7 @@ func (b *SpinPhase) Spin(
 	return res, nil
 }
 
-// processWin evaluates line wins and coin wins for the generated board result,
+// processWin evaluates ways wins and coin wins for the generated board result,
 // records corresponding events, and returns the combined payout.
 // When the win limiter is hit, it returns the capped total immediately.
 //
@@ -97,50 +106,49 @@ func (b *SpinPhase) Spin(
 //   - limiter: win cap enforcing the maximum allowed payout
 //
 // Returns:
-//   - combined total of line wins and coin wins, capped by the limiter if reached
-//   - error if line calculation or event creation fails
+//   - combined total of ways wins , capped by the limiter if reached
+//   - error if ways calculation or event creation fails
 func (b *SpinPhase) processWin(
 	board model.Board,
 	eventer *collectors.EventsCollector,
 	winLimiter limiter.WinLimiter,
 ) (uint64, error) {
-	lineWins, err := b.calc.CalculateWithStrategies(
-		board, calculators.WithLinesWinLimiter(winLimiter),
-	)
+	waysWin, err := b.calc.CalculateWays(board, winLimiter)
 	if err != nil {
 		return 0, fmt.Errorf("calculate win lines: %w", err)
 	}
 
-	totalWin := calculateWinAmount(lineWins)
-
-	if len(lineWins) != 0 {
-		lineWinEvent, err := events.NewLineWinsEvent(lineWins)
-		if err != nil {
-			return 0, fmt.Errorf("create line wins event: %w", err)
-		}
-
-		eventer.Add(lineWinEvent)
+	if len(waysWin) != 0 {
+		eventer.Add(events.NewWinsEvent(waysWin))
 	}
 
-	if winLimiter.MaxWinReached() {
-		return winLimiter.TotalWin(), nil
-	}
-
-	return totalWin, nil
+	return winLimiter.TotalWin(), nil
 }
 
-func calculateWinAmount(
-	wins calculators.LineWins,
-) uint64 {
-	if len(wins) == 0 {
-		return 0
+// checkBonusTrigger sets the number of free spins awarded by scatter symbols
+// on the board. Nothing is changed when the scatters do not trigger the bonus.
+//
+// Parameters:
+//   - res: result of the current base spin
+//
+// Returns:
+//   - error if the free spins count cannot be converted to uint32
+func (b *SpinPhase) checkBonusTrigger(
+	res *result.Base,
+) error {
+	scatterCount := res.Board.CalculateSymbol(rules.ScatterID)
+	fsCount := b.fSInitCounter.GetFsInitCount(scatterCount)
+
+	if fsCount == 0 {
+		return nil
 	}
 
-	var totalWin uint64
-
-	for _, win := range wins {
-		totalWin += win.Payout
+	safeValue, err := cast.SafeCast[uint32](fsCount)
+	if err != nil {
+		return fmt.Errorf("safe cast: %w", err)
 	}
 
-	return totalWin
+	res.SetFreeSpinsInitialsCount(safeValue)
+
+	return nil
 }

@@ -34,13 +34,12 @@ const (
 
 	// Jack represents the Jack card symbol (low-paying)
 	Jack = 9
+
+	ScatterID = 10
 )
 
 // Game mechanics constants
 const (
-	// InitRespinsCount defines the initial number of respins when the respin feature is triggered
-	InitRespinsCount    = 3
 	Step_TYPE_BASE_SPIN = 1
 	Step_TYPE_FREE_SPIN = 2
-	Step_TYPE_RE_SPIN   = 3
 )

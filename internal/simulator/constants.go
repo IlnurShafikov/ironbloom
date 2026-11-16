@@ -5,7 +5,7 @@ const (
 	DefaultRTPVersion = 96
 
 	// DefaultSpinsCount is the default number of spins in a simulation run.
-	DefaultSpinsCount = 100_000_000
+	DefaultSpinsCount = 1000_000_000
 
 	// DefaultPlayersCount is the default number of simulated players per balance group.
 	DefaultPlayersCount = 100
@@ -22,12 +22,12 @@ const (
 
 	// DefaultSimpleCostMultiplier is the cost multiplier used for the simple game mode.
 	// TODO: set a unique value for each game (usually taken from the general config).
-	DefaultSimpleCostMultiplier = 5
+	DefaultSimpleCostMultiplier = 20
 
 	// OutputDir is the directory where simulation result files are written.
 	OutputDir = "out"
 
 	// DefaultWorkersCount is the number of parallel workers used in simulation.
 	// 1 means sequential (no parallelism).
-	DefaultWorkersCount = 1
+	DefaultWorkersCount = 4
 )

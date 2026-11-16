@@ -4,6 +4,7 @@ go 1.27.1
 
 require (
 	github.com/IlnurShafikov/slot-engine v0.0.0-20260625203024-25affee1e758
+	github.com/golang/mock v1.6.0
 	github.com/google/uuid v1.6.0
 	github.com/json-iterator/go v1.1.12
 	github.com/seehuhn/mt19937 v1.0.0

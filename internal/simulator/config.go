@@ -78,7 +78,7 @@ func ParseConfigs() *SimulationConfig {
 	modID := flag.String("mod", "simple", "need '' or '/x100FS'")
 	featureID := flag.String("feature", "", "feature ID, e.g. 'x100FS'")
 	description := flag.String("description", "", "simulation description")
-	mainSeed := flag.Int64("seed", 0, "main seed")
+	mainSeed := flag.Int64("seed", 1794845675048520900, "main seed")
 	interactiveMod := flag.Bool("play", false, "play mode")
 	rngType := flag.String("rng", DefaultRngType, "mt or fortuna")
 	playerMod := flag.Bool("playerMod", false, "player simulation mode")
